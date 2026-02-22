@@ -1,3 +1,2 @@
-__pycache__/
-*.pyc
 enrollment_data.json
+__pycache__/
