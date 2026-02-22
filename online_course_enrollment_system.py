@@ -1,13 +1,9 @@
+import json
+import os
+
 print("Welcome to Online Course Enrollment")
 
-students_enrolled = {
-  "JAVASCRIPT": set(),
-  "PYTHON": set(),
-  "JAVA": set(),
-  "HTML": set(),
-  "PHP": set(),
-  "CSS": set()
-}
+students_enrolled = {}
 
 menu = {
   "ENROLL": "Enroll to a course",
@@ -51,6 +47,39 @@ def ask_for_course(prompt):
     return None
   return course
   
+def load_data():
+  if os.path.exists("enrollment_data.json"):
+    try:
+      with open("enrollment_data.json", "r") as file:
+        data = json.load(file)
+        loaded = data.get("students_enrolled", {})
+        return {
+          course: set(names) for course, names in loaded.items()
+        }
+    except json.JSONDecodeError:
+      print("\nWarning: Data file is corrupted. Starting fresh.")
+      
+  return {
+    "JAVASCRIPT": set(),
+    "PYTHON": set(),
+    "JAVA": set(),
+    "HTML": set(),
+    "PHP": set(),
+    "CSS": set()
+  }
+  
+def save_data(students_enrolled):
+  converted = {
+    course: list(names) for course, names in students_enrolled.items()
+  }
+  
+  data = {
+    "students_enrolled": converted
+  }
+  
+  with open("enrollment_data.json", "w") as file:
+    json.dump(data, file, indent=4)
+  
 def run_program():
   while True:
     show_menu(menu)
@@ -82,6 +111,8 @@ def run_program():
       print("\nYou have enrolled successfully!")
       
       proceed = input("\nPress Enter to continue...")
+      
+      save_data(students_enrolled)
           
     elif ask_feature == "DROP":
       get_course = ask_for_course("\nChoose course to drop: ")
@@ -112,6 +143,8 @@ def run_program():
       print("\nDrop successfully, See ya!")
       
       proceed = input("\nPress Enter to continue...")
+      
+      save_data(students_enrolled)
   
     elif ask_feature == "VIEW":
       view_students_enrolled()
@@ -178,5 +211,7 @@ def run_program():
       
     else:
       print("\nPlease enter a valid choice.")
-      
-run_program()
+
+if __name__ == "__main__":
+  students_enrolled = load_data()
+  run_program()
